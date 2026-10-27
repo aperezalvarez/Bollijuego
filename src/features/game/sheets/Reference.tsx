@@ -9,12 +9,14 @@ import {CardImage} from '../../../ui/cards';
 import {color, radius, type as T} from '../../../ui/theme';
 
 type Tab = 'sosp' | 'test' | 'reglas';
+const NO_WITNESSES: readonly never[] = [];
 
 /** Hoja de referencia: la matriz de rasgos y los efectos de los testigos, siempre a mano en la partida. */
 export function ReferenceSheet() {
   const [tab, setTab] = useState<Tab>('sosp');
   const {width} = useWindowDimensions();
-  const active = useStore(s => s.game?.pub.witnesses ?? []);
+  const witnesses = useStore(s => s.game?.pub.witnesses);
+  const active = witnesses ?? NO_WITNESSES;
   const w = Math.min(width - 32, 360);
   return (
     <Sheet title="Hoja de referencia" tall>

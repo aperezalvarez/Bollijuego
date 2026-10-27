@@ -183,7 +183,10 @@ export const useStore = create<State>()(
       eraseAt: (x, y, r) =>
         set(s => {
           const keep = s.strokes.filter(st => {
-            for (let i = 0; i < st.pts.length; i += 2) {
+            if (!Array.isArray(st?.pts)) {
+              return false; // trazo corrupto: se descarta
+            }
+            for (let i = 0; i + 1 < st.pts.length; i += 2) {
               if (Math.hypot(st.pts[i] - x, st.pts[i + 1] - y) <= r + st.width) {
                 return false;
               }

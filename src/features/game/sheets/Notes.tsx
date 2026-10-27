@@ -16,6 +16,31 @@ const INKS = ['#2a1a12', '#8e2a22', '#1c3f66', '#46603a'];
 const WIDTHS = [2, 4, 7];
 const PAPER = '#ead9b6';
 
+/** Un fallo dentro del cuaderno nunca debe cerrar la app: se muestra un aviso dentro de la hoja. */
+class NotesBoundary extends React.Component<{children: React.ReactNode}, {failed: boolean}> {
+  state = {failed: false};
+  static getDerivedStateFromError() {
+    return {failed: true};
+  }
+  render() {
+    if (this.state.failed) {
+      return (
+        <View style={styles.fallback}>
+          <Text style={styles.summary}>No se pudo mostrar esta pestaña.</Text>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Reintentar"
+            onPress={() => this.setState({failed: false})}
+            style={styles.segBtn}>
+            <Text style={styles.segText}>Reintentar</Text>
+          </Pressable>
+        </View>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 export function NotesSheet() {
   const tab = useStore(s => s.notesTab);
   const setTab = useStore(s => s.setNotesTab);
@@ -29,14 +54,18 @@ export function NotesSheet() {
         value={tab}
         onChange={setTab}
       />
-      <View style={styles.paper}>{tab === 'tabla' ? <DeductionTable /> : <Canvas />}</View>
+      <View style={styles.paper}>
+        <NotesBoundary key={tab}>{tab === 'dibujo' ? <Canvas /> : <DeductionTable />}</NotesBoundary>
+      </View>
     </Sheet>
   );
 }
 
 // ---------------------------------------------------------------- tabla de deducción
 function DeductionTable() {
-  const speakers = useStore(s => s.game?.pub.slots.map(x => x.speaker) ?? []);
+  // Selector estable: devolver un array nuevo por lectura provoca un bucle infinito de renders (zustand 5).
+  const slots = useStore(s => s.game?.pub.slots);
+  const speakers = useMemo(() => (slots ?? []).map(x => x.speaker), [slots]);
   const nK = useStore(s => s.game?.pub.killers ?? 0);
   const nL = useStore(s => s.game?.pub.liars ?? 0);
   const marks = useStore(s => s.marks);
@@ -137,6 +166,9 @@ export function pathOf(pts: number[]): string {
 }
 
 const StrokePath = React.memo(function StrokePath({s}: {s: Stroke}) {
+  if (!Array.isArray(s?.pts) || s.pts.length < 2) {
+    return null; // trazo corrupto en el estado persistido
+  }
   return (
     <Path
       d={pathOf(s.pts)}
@@ -168,6 +200,15 @@ const LiveStroke = React.forwardRef<Live, {color: string; width: number}>(functi
   ) : null;
 });
 
+/** Los gestos del lienzo jamás propagan una excepción al hilo de eventos. */
+const safe = (f: () => void) => {
+  try {
+    f();
+  } catch {
+    // gesto descartado
+  }
+};
+
 function Canvas() {
   const strokes = useStore(s => s.strokes);
   const ink = useStore(s => s.strokeColor);
@@ -180,6 +221,9 @@ function Canvas() {
 
   const pan = useMemo(() => {
     const add = (x: number, y: number) => {
+      if (!Number.isFinite(x) || !Number.isFinite(y)) {
+        return;
+      }
       const c = cur.current;
       if (c.length >= 2 && Math.hypot(x - c[c.length - 2], y - c[c.length - 1]) < 2.5) {
         return;
@@ -190,26 +234,33 @@ function Canvas() {
     return PanResponder.create({
       onStartShouldSetPanResponder: () => true,
       onMoveShouldSetPanResponder: () => true,
-      onPanResponderGrant: e => {
-        const {locationX: x, locationY: y} = e.nativeEvent;
-        if (tool.current.eraser) {
-          useStore.getState().eraseAt(x, y, 14);
-        } else {
-          cur.current = [];
-          add(x, y);
-        }
-      },
-      onPanResponderMove: e => {
-        const {locationX: x, locationY: y} = e.nativeEvent;
-        if (tool.current.eraser) {
-          useStore.getState().eraseAt(x, y, 14);
-        } else {
-          add(x, y);
-        }
-      },
-      onPanResponderRelease: () => end(),
-      onPanResponderTerminate: () => end(),
+      onPanResponderGrant: e =>
+        safe(() => {
+          const {locationX: x, locationY: y} = e.nativeEvent;
+          if (tool.current.eraser) {
+            erase(x, y);
+          } else {
+            cur.current = [];
+            add(x, y);
+          }
+        }),
+      onPanResponderMove: e =>
+        safe(() => {
+          const {locationX: x, locationY: y} = e.nativeEvent;
+          if (tool.current.eraser) {
+            erase(x, y);
+          } else {
+            add(x, y);
+          }
+        }),
+      onPanResponderRelease: () => safe(end),
+      onPanResponderTerminate: () => safe(end),
     });
+    function erase(x: number, y: number) {
+      if (Number.isFinite(x) && Number.isFinite(y)) {
+        useStore.getState().eraseAt(x, y, 14);
+      }
+    }
     function end() {
       if (!tool.current.eraser && cur.current.length >= 2) {
         useStore.getState().addStroke({color: tool.current.ink, width: tool.current.width, pts: cur.current});
@@ -315,6 +366,7 @@ const styles = StyleSheet.create({
     borderColor: color.brass,
     overflow: 'hidden',
   },
+  fallback: {flex: 1, padding: 16, gap: 12, justifyContent: 'center'},
   summary: {color: color.ink, fontWeight: '800', fontSize: 15, textAlign: 'center'},
   hintInk: {color: '#4a3526', fontSize: 13, textAlign: 'center'},
   row: {
