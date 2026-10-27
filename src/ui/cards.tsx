@@ -1,6 +1,6 @@
 import React, {memo} from 'react';
 import type {ImageSourcePropType} from 'react-native';
-import {Image, ImageBackground, Pressable, StyleSheet, Text, View} from 'react-native';
+import {Image, Pressable, StyleSheet, Text, View} from 'react-native';
 import {ART, SUSPECT_ART, WITNESS_ART} from '../assets/cards';
 import {
   WITNESS_INFO,
@@ -26,29 +26,37 @@ export const cardHeight = (w: number) => w / CARD_ASPECT;
 export const cardRadius = (w: number) => Math.max(3, Math.round(w * 0.032));
 
 /**
- * Ilustración de carta a tamaño exacto CARD_ASPECT. El borde (si lo hay) se dibuja ENCIMA para no
- * comer píxeles de la imagen, y esta llena el contenedor sin recortes apreciables ni distorsión.
+ * ÚNICO punto donde se pinta una ilustración. Contenedor Y imagen llevan tamaño numérico explícito
+ * (nada de absoluteFill ni tamaño intrínseco), `resizeMethod="resize"` obliga a Android a decodificar
+ * al tamaño pedido en vez del bitmap completo escalado por densidad, y el borde va ENCIMA.
+ * `height` por defecto respeta CARD_ASPECT; la portada/tablas usan `contain` para verse enteras.
  */
 export function CardImage({
   source,
   width,
+  height = cardHeight(width),
+  fit = 'cover',
   borderColor,
   borderWidth = 2,
   label,
 }: {
   source: ImageSourcePropType;
   width: number;
+  height?: number;
+  fit?: 'cover' | 'contain';
   borderColor?: string;
   borderWidth?: number;
   label?: string;
 }) {
   const r = cardRadius(width);
   return (
-    <View style={{width, height: cardHeight(width), borderRadius: r, overflow: 'hidden'}}>
+    <View style={{width, height, borderRadius: r, overflow: 'hidden'}}>
       <Image
         source={source}
-        style={StyleSheet.absoluteFill}
-        resizeMode="cover"
+        style={{width, height}}
+        resizeMode={fit}
+        resizeMethod="resize"
+        fadeDuration={0}
         accessible={!!label}
         accessibilityLabel={label}
       />
@@ -159,7 +167,7 @@ export const SuspectCard = memo(function SuspectCard({
       }${cleared ? ', descartado' : ''}`}
       accessibilityHint="Abre la ficha del sospechoso"
       style={[styles.card, {width, height: h, borderRadius: cardRadius(width)}]}>
-      <Image source={SUSPECT_ART[id]} style={StyleSheet.absoluteFill} resizeMode="cover" />
+      <CardImage source={SUSPECT_ART[id]} width={width} />
       {guilty || liar ? (
         <View
           pointerEvents="none"
@@ -220,16 +228,19 @@ export function TestimonyCard({id, st, width, witnesses, onZoom}: TestimonyProps
   const hints = assisted ? hintFor(st, witnesses) : [];
 
   const face = (
-    <ImageBackground source={ART.testimonio} style={{width, height: h}} resizeMode="cover">
+    <View style={{width, height: h}}>
+      <CardImage source={ART.testimonio} width={width} />
       <View
-        style={{
-          flex: 1,
-          paddingLeft: width * 0.22,
-          paddingRight: width * 0.15,
-          paddingTop: width * 0.15,
-          paddingBottom: width * 0.25,
-          justifyContent: 'center',
-        }}>
+        style={[
+          StyleSheet.absoluteFill,
+          {
+            paddingLeft: width * 0.22,
+            paddingRight: width * 0.15,
+            paddingTop: width * 0.15,
+            paddingBottom: width * 0.25,
+            justifyContent: 'center',
+          },
+        ]}>
         <View style={styles.plate}>
           <RichStatement st={st} size={size} />
         </View>
@@ -248,9 +259,9 @@ export function TestimonyCard({id, st, width, witnesses, onZoom}: TestimonyProps
           </Text>
         </View>
       ) : null}
-    </ImageBackground>
+    </View>
   );
-  const back = <Image source={ART.dorso} style={{width, height: h}} resizeMode="cover" />;
+  const back = <CardImage source={ART.dorso} width={width} />;
 
   return (
     <View style={{width, height: h}}>

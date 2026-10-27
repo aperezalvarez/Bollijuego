@@ -1,10 +1,11 @@
 import React from 'react';
-import {Image, ScrollView, StyleSheet, Text, View, useWindowDimensions} from 'react-native';
+import {ScrollView, StyleSheet, Text, View, useWindowDimensions} from 'react-native';
 import {ART} from '../../assets/cards';
 import {DAILY_CONFIG, dailySeed, dayKey, generateCase, toPublic, MODE_LABEL} from '../../domain';
 import {useNav} from '../../app/nav';
 import {canContinue, elapsedOf, useStore} from '../../state/store';
 import {Button} from '../../ui/Button';
+import {CardImage} from '../../ui/cards';
 import {fmtTime} from '../../ui/Stopwatch';
 import {Screen} from '../../ui/WoodBackground';
 import {CARD_ASPECT, color, type as T} from '../../ui/theme';
@@ -16,7 +17,8 @@ export function Home() {
   const stats = useStore(s => s.stats);
   const today = dayKey(new Date());
   const doneToday = stats.daily[today];
-  const artW = Math.min(width * 0.62, height * 0.36 * CARD_ASPECT, 260);
+  // La portada cabe SIEMPRE: limitada por ancho útil y por ~40 % del alto, con la proporción real.
+  const artW = Math.max(120, Math.min(width - 80, height * 0.4 * CARD_ASPECT, 280));
 
   const startDaily = () => {
     const seed = dailySeed(new Date());
@@ -40,11 +42,12 @@ export function Home() {
     <Screen>
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         <View style={[styles.art, {width: artW, height: artW / CARD_ASPECT}]}>
-          <Image
+          <CardImage
             source={ART.portada}
-            style={StyleSheet.absoluteFill}
-            resizeMode="contain"
-            accessibilityLabel="¿Quién mató a la gallina?"
+            width={artW}
+            height={artW / CARD_ASPECT}
+            fit="contain"
+            label="¿Quién mató a la gallina?"
           />
         </View>
         <View style={styles.menu}>

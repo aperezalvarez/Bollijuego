@@ -36,6 +36,7 @@ export function ReferenceSheet() {
               <CardImage
                 source={ART.sospechosos}
                 width={w}
+                fit="contain"
                 label="Tabla de sospechosos: nombre, género y nivel de afecto"
               />
             </View>
@@ -75,7 +76,12 @@ export function ReferenceSheet() {
             ))}
             <Text style={styles.note}>{WITNESS_NOTE}</Text>
             <View style={styles.center}>
-              <CardImage source={ART.testigos} width={w} label="Carta de testigos y sus efectos" />
+              <CardImage
+                source={ART.testigos}
+                width={w}
+                fit="contain"
+                label="Carta de testigos y sus efectos"
+              />
             </View>
           </>
         ) : null}
