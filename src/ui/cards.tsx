@@ -155,17 +155,20 @@ export const SuspectCard = memo(function SuspectCard({
   const cleared = mark?.guilt === 'innocent';
   const liar = mark?.honesty === 'liar';
   const fs = Math.max(13, Math.min(17, width * 0.095));
+  // Sin onPress la carta es solo visual: un Pressable hijo sin acción se queda con el gesto y el
+  // Pressable padre (p. ej. la selección de la rejilla) solo respondía con dos dedos.
+  const Wrapper = onPress ? Pressable : View;
+  const interactive = onPress ? {onPress, accessibilityRole: 'button' as const} : {accessible: true};
   return (
-    <Pressable
-      onPress={onPress}
-      accessibilityRole="button"
+    <Wrapper
+      {...interactive}
       accessibilityLabel={`${id}, ${s.gender === 'M' ? 'chico' : 'chica'}, ${traitLabel(
         s.gender,
         s.level,
       ).toLowerCase()}${guilty ? ', marcado como posible asesino' : ''}${
         liar ? ', marcado como mentiroso' : ''
       }${cleared ? ', descartado' : ''}`}
-      accessibilityHint="Abre la ficha del sospechoso"
+      accessibilityHint={onPress ? 'Abre la ficha del sospechoso' : undefined}
       style={[styles.card, {width, height: h, borderRadius: cardRadius(width)}]}>
       <CardImage source={SUSPECT_ART[id]} width={width} />
       {guilty || liar ? (
@@ -195,7 +198,7 @@ export const SuspectCard = memo(function SuspectCard({
         </Text>
       </View>
       {cleared ? <View pointerEvents="none" style={styles.dim} /> : null}
-    </Pressable>
+    </Wrapper>
   );
 });
 

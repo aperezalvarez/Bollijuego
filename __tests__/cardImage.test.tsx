@@ -31,3 +31,20 @@ describe('CardImage', () => {
     expect(img.props.resizeMode).toBe('contain');
   });
 });
+
+describe('SuspectCard', () => {
+  it('sin onPress no crea un Pressable que robe el gesto al padre', async () => {
+    const {Pressable} = require('react-native');
+    const {SuspectCard} = require('../src/ui/cards');
+    let tree!: renderer.ReactTestRenderer;
+    await act(async () => {
+      tree = renderer.create(<SuspectCard id="Tavio" width={74} />);
+    });
+    expect(tree.root.findAllByType(Pressable)).toHaveLength(0);
+    const onPress = jest.fn();
+    await act(async () => {
+      tree.update(<SuspectCard id="Tavio" width={74} onPress={onPress} />);
+    });
+    expect(tree.root.findAllByType(Pressable)).toHaveLength(1);
+  });
+});

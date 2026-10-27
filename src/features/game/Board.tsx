@@ -103,6 +103,7 @@ export function Board({navigation}: Props) {
           onPress={() => navigation.navigate('Options')}
         />
         <View style={styles.pills}>
+          <Pill icon="users" label="Sospechosos" n={pub.slots.length} />
           <Pill icon="knife" label="Asesinos" n={pub.killers} />
           <Pill icon="mask" label="Mentirosos" n={pub.liars} />
         </View>
@@ -221,12 +222,16 @@ export function Board({navigation}: Props) {
   );
 }
 
-function Pill({icon, label, n}: {icon: 'knife' | 'mask'; label: string; n: number}) {
+function Pill({icon, label, n}: {icon: 'users' | 'knife' | 'mask'; label: string; n: number}) {
   return (
     <View style={styles.pill} accessible accessibilityLabel={`${label}: ${n}`}>
-      <Icon name={icon} size={16} color={color.gold} />
-      <Text style={styles.pillN}>{n}</Text>
-      <Text style={styles.pillL}>{label}</Text>
+      <View style={styles.pillTop}>
+        <Icon name={icon} size={15} color={color.gold} />
+        <Text style={styles.pillN}>{n}</Text>
+      </View>
+      <Text style={styles.pillL} numberOfLines={1}>
+        {label}
+      </Text>
     </View>
   );
 }
@@ -365,20 +370,20 @@ const styles = StyleSheet.create({
     borderColor: color.brass,
     backgroundColor: 'rgba(27,18,12,0.85)',
   },
-  pills: {flex: 1, flexDirection: 'row', gap: 6, justifyContent: 'center'},
+  pills: {flex: 1, flexDirection: 'row', gap: 4, justifyContent: 'center'},
+  pillTop: {flexDirection: 'row', alignItems: 'center', gap: 4},
   pill: {
-    flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
+    flexShrink: 1,
     backgroundColor: color.wood900,
     borderRadius: radius.md,
     borderWidth: 1,
     borderColor: color.brass,
-    paddingHorizontal: 8,
-    paddingVertical: 5,
+    paddingHorizontal: 6,
+    paddingVertical: 3,
   },
   pillN: {color: color.gold, fontWeight: '800', fontSize: 16},
-  pillL: {color: color.textMuted, fontWeight: '700', fontSize: 11},
+  pillL: {color: color.textMuted, fontWeight: '700', fontSize: 10},
   clock: {flexDirection: 'row', alignItems: 'center', gap: 5, paddingRight: 6},
   clockText: {color: color.textOnDark, fontWeight: '800', fontSize: 16},
   players: {flexDirection: 'row', flexWrap: 'wrap', gap: 6, paddingHorizontal: 12, paddingVertical: 6},
