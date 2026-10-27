@@ -11,7 +11,10 @@
   },
   "dependencies": {
     "react": "18.2.0",
-    "react-native": "0.74.5"
+    "react-native": "0.74.5",
+    "react-native-network-info": "^5.2.2",
+    "react-native-svg": "^15.2.0",
+    "react-native-tcp-socket": "^6.4.1"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
