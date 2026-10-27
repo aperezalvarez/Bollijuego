@@ -17,10 +17,12 @@ interface Props {
   onPress?: () => void;
   onFlipDone?: (flipped: boolean) => void;
   style?: StyleProp<ViewStyle>;
+  /** Radio de las caras (por defecto 12). */
+  radius?: number;
 }
 
 /** Volteo 3D en el hilo UI (worklets): 0 → 1 = dorso → cara. Respeta "reducir movimiento" del sistema. */
-export function FlipCard({front, back, flipped, onPress, onFlipDone, style}: Props) {
+export function FlipCard({front, back, flipped, onPress, onFlipDone, style, radius = 12}: Props) {
   const p = useSharedValue(flipped ? 1 : 0);
   const reduce = useReducedMotion();
 
@@ -50,8 +52,8 @@ export function FlipCard({front, back, flipped, onPress, onFlipDone, style}: Pro
       style={[styles.box, style]}
       accessibilityRole="button"
       accessibilityState={{expanded: flipped}}>
-      <Animated.View style={[styles.face, backStyle]}>{back}</Animated.View>
-      <Animated.View style={[styles.face, frontStyle]}>{front}</Animated.View>
+      <Animated.View style={[styles.face, {borderRadius: radius}, backStyle]}>{back}</Animated.View>
+      <Animated.View style={[styles.face, {borderRadius: radius}, frontStyle]}>{front}</Animated.View>
     </Pressable>
   );
 }
@@ -61,7 +63,6 @@ const styles = StyleSheet.create({
   face: {
     ...StyleSheet.absoluteFillObject,
     backfaceVisibility: 'hidden',
-    borderRadius: 12,
     overflow: 'hidden',
   },
 });

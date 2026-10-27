@@ -1,6 +1,6 @@
 import type {NativeStackScreenProps} from '@react-navigation/native-stack';
 import React, {useMemo} from 'react';
-import {Image, ScrollView, StyleSheet, Text, View} from 'react-native';
+import {ScrollView, StyleSheet, Text, View} from 'react-native';
 import {WITNESS_ART} from '../../assets/cards';
 import type {RootStackParamList} from '../../app/types';
 import {
@@ -16,7 +16,7 @@ import {useStore} from '../../state/store';
 import {Button} from '../../ui/Button';
 import {Header, Plate} from '../../ui/Controls';
 import {Screen} from '../../ui/WoodBackground';
-import {cardHeight} from '../../ui/cards';
+import {CardImage} from '../../ui/cards';
 import {color, radius, type as T} from '../../ui/theme';
 import {ExplainList} from '../game/ExplainList';
 
@@ -55,7 +55,7 @@ export function Rules({navigation}: NativeStackScreenProps<RootStackParamList, '
         <Plate title="Los testigos">
           {ALL_WITNESS_IDS.map(id => (
             <View key={id} style={styles.w}>
-              <Image source={WITNESS_ART[id]} style={{width: 56, height: cardHeight(56), borderRadius: 6}} />
+              <CardImage source={WITNESS_ART[id]} width={56} />
               <View style={{flex: 1}}>
                 <Text style={styles.strong}>
                   {WITNESS_INFO[id].title} · {WITNESS_INFO[id].short}

@@ -1,7 +1,7 @@
 import type {RouteProp} from '@react-navigation/native';
 import {useRoute} from '@react-navigation/native';
 import React from 'react';
-import {Image, ScrollView, StyleSheet, Text, View} from 'react-native';
+import {ScrollView, StyleSheet, Text, View} from 'react-native';
 import {WITNESS_ART} from '../../../assets/cards';
 import type {RootStackParamList} from '../../../app/types';
 import {
@@ -17,7 +17,7 @@ import {
 import {useMark, useRevealed, useStore} from '../../../state/store';
 import {Icon} from '../../../ui/Icon';
 import {Sheet} from '../../../ui/Sheet';
-import {RichStatement, SuspectCard, cardHeight} from '../../../ui/cards';
+import {CardImage, RichStatement, SuspectCard} from '../../../ui/cards';
 import {color, radius, type as T} from '../../../ui/theme';
 
 export function DetailSheet() {
@@ -30,9 +30,7 @@ export function DetailSheet() {
       <Sheet title={info.title}>
         <ScrollView contentContainerStyle={styles.col}>
           <View style={styles.center}>
-            <View style={[styles.frame, {width: 150, height: cardHeight(150)}]}>
-              <Image source={WITNESS_ART[params.id]} style={StyleSheet.absoluteFill} resizeMode="cover" />
-            </View>
+            <CardImage source={WITNESS_ART[params.id]} width={150} borderColor={color.brass} />
             <Text style={styles.big}>{info.short}</Text>
           </View>
           <Text style={styles.body}>{info.effect}</Text>
@@ -108,7 +106,6 @@ function Row({icon, text}: {icon: 'male' | 'female' | 'heart'; text: string}) {
 const styles = StyleSheet.create({
   col: {gap: 14, paddingBottom: 12},
   center: {alignItems: 'center', gap: 10},
-  frame: {borderRadius: radius.card, overflow: 'hidden', borderWidth: 2, borderColor: color.brass},
   big: {...T.h2, color: color.gold},
   body: {...T.body, color: color.textOnDark},
   note: {...T.small, color: color.textMuted},

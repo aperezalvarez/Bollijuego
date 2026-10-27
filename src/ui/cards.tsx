@@ -1,4 +1,5 @@
 import React, {memo} from 'react';
+import type {ImageSourcePropType} from 'react-native';
 import {Image, ImageBackground, Pressable, StyleSheet, Text, View} from 'react-native';
 import {ART, SUSPECT_ART, WITNESS_ART} from '../assets/cards';
 import {
@@ -18,9 +19,48 @@ import {FlipCard} from './FlipCard';
 import {Icon} from './Icon';
 import {haptic} from './haptics';
 import {sfx} from './sound';
-import {CARD_ASPECT, color, radius} from './theme';
+import {CARD_ASPECT, color} from './theme';
 
 export const cardHeight = (w: number) => w / CARD_ASPECT;
+/** Radio proporcional y pequeño: el marco ornamental de la ilustración ya trae sus esquinas. */
+export const cardRadius = (w: number) => Math.max(3, Math.round(w * 0.032));
+
+/**
+ * Ilustración de carta a tamaño exacto CARD_ASPECT. El borde (si lo hay) se dibuja ENCIMA para no
+ * comer píxeles de la imagen, y esta llena el contenedor sin recortes apreciables ni distorsión.
+ */
+export function CardImage({
+  source,
+  width,
+  borderColor,
+  borderWidth = 2,
+  label,
+}: {
+  source: ImageSourcePropType;
+  width: number;
+  borderColor?: string;
+  borderWidth?: number;
+  label?: string;
+}) {
+  const r = cardRadius(width);
+  return (
+    <View style={{width, height: cardHeight(width), borderRadius: r, overflow: 'hidden'}}>
+      <Image
+        source={source}
+        style={StyleSheet.absoluteFill}
+        resizeMode="cover"
+        accessible={!!label}
+        accessibilityLabel={label}
+      />
+      {borderColor ? (
+        <View
+          pointerEvents="none"
+          style={[StyleSheet.absoluteFill, {borderRadius: r, borderWidth, borderColor}]}
+        />
+      ) : null}
+    </View>
+  );
+}
 
 // ---------------------------------------------------------------- texto enriquecido
 const SEG_COLOR: Record<SegKind, string> = {
@@ -118,13 +158,18 @@ export const SuspectCard = memo(function SuspectCard({
         liar ? ', marcado como mentiroso' : ''
       }${cleared ? ', descartado' : ''}`}
       accessibilityHint="Abre la ficha del sospechoso"
-      style={[
-        styles.card,
-        {width, height: h},
-        guilty && styles.frameGuilty,
-        liar && !guilty && styles.frameLiar,
-      ]}>
+      style={[styles.card, {width, height: h, borderRadius: cardRadius(width)}]}>
       <Image source={SUSPECT_ART[id]} style={StyleSheet.absoluteFill} resizeMode="cover" />
+      {guilty || liar ? (
+        <View
+          pointerEvents="none"
+          style={[
+            StyleSheet.absoluteFill,
+            styles.frameOverlay,
+            {borderRadius: cardRadius(width), borderColor: guilty ? color.bloodBright : color.gold},
+          ]}
+        />
+      ) : null}
       <View style={[styles.topRow, {top: h * 0.06, left: width * 0.08, right: width * 0.08}]}>
         <GenderBadge gender={s.gender} size={Math.max(24, width * 0.16)} />
         <HeartMeter level={s.level} />
@@ -213,6 +258,7 @@ export function TestimonyCard({id, st, width, witnesses, onZoom}: TestimonyProps
         flipped={revealed}
         front={face}
         back={back}
+        radius={cardRadius(width)}
         style={{width, height: h, aspectRatio: undefined}}
         onPress={() => {
           if (!revealed) {
@@ -238,9 +284,7 @@ export function WitnessTile({id, onPress}: {id: WitnessId; onPress: () => void})
       accessibilityLabel={`Testigo ${id}: ${WITNESS_INFO[id].short}`}
       accessibilityHint="Explica su efecto"
       style={styles.witness}>
-      <View style={[styles.card, {width: w, height: cardHeight(w), borderColor: color.brass}]}>
-        <Image source={WITNESS_ART[id]} style={StyleSheet.absoluteFill} resizeMode="cover" />
-      </View>
+      <CardImage source={WITNESS_ART[id]} width={w} borderColor={color.brass} />
       <Text style={styles.witnessName} numberOfLines={1}>
         {id}
       </Text>
@@ -253,10 +297,7 @@ export function WitnessTile({id, onPress}: {id: WitnessId; onPress: () => void})
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: radius.card,
     overflow: 'hidden',
-    borderWidth: 2,
-    borderColor: 'rgba(184,137,58,0.0)',
     backgroundColor: color.wood800,
     elevation: 5,
     shadowColor: '#000',
@@ -264,8 +305,7 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     shadowOffset: {width: 0, height: 3},
   },
-  frameGuilty: {borderColor: color.bloodBright},
-  frameLiar: {borderColor: color.gold},
+  frameOverlay: {borderWidth: 2},
   topRow: {position: 'absolute', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'},
   roundel: {
     backgroundColor: color.gold,

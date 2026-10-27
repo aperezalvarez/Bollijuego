@@ -20,7 +20,7 @@ import {Setup} from '../features/setup/Setup';
 import {useAppLifecycle} from '../platform/lifecycle';
 import {useStore} from '../state/store';
 import {setHapticsEnabled} from '../ui/haptics';
-import {setSoundEnabled} from '../ui/sound';
+import {preloadSfx, setSoundEnabled} from '../ui/sound';
 import {color} from '../ui/theme';
 import type {RootStackParamList} from './types';
 
@@ -57,6 +57,7 @@ export function RootNavigator() {
   const haptics = useStore(s => s.settings.haptics);
   const sound = useStore(s => s.settings.sound);
   useEffect(() => setHapticsEnabled(haptics), [haptics]);
+  useEffect(() => preloadSfx(), []);
   useEffect(() => setSoundEnabled(sound), [sound]);
 
   const lifecycle = useMemo(

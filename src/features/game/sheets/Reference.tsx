@@ -1,11 +1,11 @@
 import React, {useState} from 'react';
-import {Image, ScrollView, StyleSheet, Text, View, useWindowDimensions} from 'react-native';
+import {ScrollView, StyleSheet, Text, View, useWindowDimensions} from 'react-native';
 import {ART, WITNESS_ART} from '../../../assets/cards';
 import {RULES_TEXT, SUSPECTS, WITNESS_INFO, WITNESS_NOTE, traitLabel} from '../../../domain';
 import {useStore} from '../../../state/store';
 import {Chips} from '../../../ui/Controls';
 import {Sheet} from '../../../ui/Sheet';
-import {cardHeight} from '../../../ui/cards';
+import {CardImage} from '../../../ui/cards';
 import {color, radius, type as T} from '../../../ui/theme';
 
 type Tab = 'sosp' | 'test' | 'reglas';
@@ -30,12 +30,13 @@ export function ReferenceSheet() {
       <ScrollView contentContainerStyle={styles.col} showsVerticalScrollIndicator={false}>
         {tab === 'sosp' ? (
           <>
-            <Image
-              source={ART.sospechosos}
-              style={{width: w, height: cardHeight(w), alignSelf: 'center', borderRadius: radius.card}}
-              resizeMode="contain"
-              accessibilityLabel="Tabla de sospechosos: nombre, género y nivel de afecto"
-            />
+            <View style={styles.center}>
+              <CardImage
+                source={ART.sospechosos}
+                width={w}
+                label="Tabla de sospechosos: nombre, género y nivel de afecto"
+              />
+            </View>
             <Text style={styles.h}>De menos a más cariñoso</Text>
             {[0, 1, 2, 3].map(l => {
               const [m, f] = SUSPECTS.filter(s => s.level === l);
@@ -61,10 +62,7 @@ export function ReferenceSheet() {
             {active.length > 0 ? <Text style={styles.h}>En esta mesa</Text> : null}
             {active.map(id => (
               <View key={id} style={styles.wRow}>
-                <Image
-                  source={WITNESS_ART[id]}
-                  style={{width: 64, height: cardHeight(64), borderRadius: 6}}
-                />
+                <CardImage source={WITNESS_ART[id]} width={64} />
                 <View style={{flex: 1}}>
                   <Text style={styles.strong}>
                     {WITNESS_INFO[id].title} · {WITNESS_INFO[id].short}
@@ -74,12 +72,9 @@ export function ReferenceSheet() {
               </View>
             ))}
             <Text style={styles.note}>{WITNESS_NOTE}</Text>
-            <Image
-              source={ART.testigos}
-              style={{width: w, height: cardHeight(w), alignSelf: 'center', borderRadius: radius.card}}
-              resizeMode="contain"
-              accessibilityLabel="Carta de testigos y sus efectos"
-            />
+            <View style={styles.center}>
+              <CardImage source={ART.testigos} width={w} label="Carta de testigos y sus efectos" />
+            </View>
           </>
         ) : null}
         {tab === 'reglas'
@@ -97,6 +92,7 @@ export function ReferenceSheet() {
 
 const styles = StyleSheet.create({
   col: {gap: 12, paddingVertical: 12},
+  center: {alignItems: 'center'},
   h: {...T.h3, color: color.gold},
   body: {...T.body, color: color.textOnDark},
   strong: {color: color.gold, fontWeight: '800', fontSize: 15},

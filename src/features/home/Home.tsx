@@ -7,7 +7,7 @@ import {canContinue, elapsedOf, useStore} from '../../state/store';
 import {Button} from '../../ui/Button';
 import {fmtTime} from '../../ui/Stopwatch';
 import {Screen} from '../../ui/WoodBackground';
-import {color, type as T} from '../../ui/theme';
+import {CARD_ASPECT, color, type as T} from '../../ui/theme';
 
 export function Home() {
   const nav = useNav();
@@ -16,7 +16,7 @@ export function Home() {
   const stats = useStore(s => s.stats);
   const today = dayKey(new Date());
   const doneToday = stats.daily[today];
-  const artW = Math.min(width * 0.5, height * 0.26, 220);
+  const artW = Math.min(width * 0.62, height * 0.36 * CARD_ASPECT, 260);
 
   const startDaily = () => {
     const seed = dailySeed(new Date());
@@ -39,7 +39,7 @@ export function Home() {
   return (
     <Screen>
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        <View style={[styles.art, {width: artW, height: artW * (537 / 382)}]}>
+        <View style={[styles.art, {width: artW, height: artW / CARD_ASPECT}]}>
           <Image
             source={ART.portada}
             style={StyleSheet.absoluteFill}
@@ -104,8 +104,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   art: {
-    borderRadius: 14,
-    overflow: 'hidden',
+    borderRadius: 6,
     elevation: 14,
     shadowColor: '#000',
     shadowOpacity: 0.55,
