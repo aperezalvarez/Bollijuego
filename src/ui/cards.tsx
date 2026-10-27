@@ -368,12 +368,8 @@ const styles = StyleSheet.create({
     borderColor: color.textOnDark,
   },
   dim: {...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(20,12,8,0.5)'},
-  plate: {
-    backgroundColor: 'rgba(240,226,194,0.62)',
-    borderRadius: 8,
-    paddingHorizontal: 4,
-    paddingVertical: 4,
-  },
+  // Sin caja ni fondo: el texto va directo sobre el pergamino ilustrado.
+  plate: {paddingHorizontal: 4, paddingVertical: 4},
   hintChip: {
     position: 'absolute',
     top: '7%',

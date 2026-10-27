@@ -177,7 +177,7 @@ export function Board({navigation}: Props) {
         <Button
           compact
           icon="book"
-          label="Referencia"
+          label="Guía"
           style={styles.barBtn}
           onPress={() => navigation.navigate('Reference')}
         />

@@ -19,7 +19,7 @@ export function ReferenceSheet() {
   const active = witnesses ?? NO_WITNESSES;
   const w = Math.min(width - 32, 360);
   return (
-    <Sheet title="Hoja de referencia" tall>
+    <Sheet title="Guía" tall>
       <Chips<Tab>
         options={[
           {id: 'sosp', label: 'Sospechosos'},
