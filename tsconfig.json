@@ -1,3 +1,6 @@
 {
-  "extends": "@react-native/typescript-config/tsconfig.json"
+  "extends": "@react-native/typescript-config/tsconfig.json",
+  "compilerOptions": {"noUnusedLocals": true, "noImplicitReturns": true, "noFallthroughCasesInSwitch": true, "types": ["react-native", "jest", "node"]},
+  "include": ["App.tsx", "index.js", "src", "__tests__"],
+  "exclude": ["node_modules", "android", "ios"]
 }

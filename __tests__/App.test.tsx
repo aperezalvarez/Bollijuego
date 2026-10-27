@@ -1,17 +1,17 @@
-/**
- * @format
- */
-
-import 'react-native';
 import React from 'react';
-import App from '../App';
+import renderer, {act} from 'react-test-renderer';
+import {useStore} from '../src/state/store';
 
-// Note: import explicitly to use the types shipped with jest.
-import {it} from '@jest/globals';
-
-// Note: test renderer must be required after react-native.
-import renderer from 'react-test-renderer';
-
-it('renders correctly', () => {
-  renderer.create(<App />);
+it('la app arranca y muestra la portada con «Solitario» y «Multijugador local»', async () => {
+  const App = require('../App').default;
+  await useStore.persist.rehydrate();
+  let tree!: renderer.ReactTestRenderer;
+  await act(async () => {
+    tree = renderer.create(<App />);
+  });
+  const labels = tree.root
+    .findAll(n => typeof n.props.accessibilityLabel === 'string')
+    .map(n => n.props.accessibilityLabel);
+  expect(labels).toEqual(expect.arrayContaining(['Solitario', 'Multijugador local', 'Tutorial / Reglas']));
+  tree.unmount();
 });
